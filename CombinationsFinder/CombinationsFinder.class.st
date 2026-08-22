@@ -113,50 +113,43 @@ CombinationsFinder class >> updateHtmlRoot: root [
 CombinationsFinder >> findCombinaitionsValues: valuesArray total: total [
 
 	| result current |
-	result := Array new.
-	current := Array new. 
-	self findCombinaitionsValues: valuesArray total: total current: current result: result. 
-	^ result. 
+	result := OrderedCollection new.
+	current := OrderedCollection new.
+	self
+		findCombinaitionsValues: valuesArray
+		total: total
+		current: current
+		result: result.
+	^ result
 ]
 
 { #category : 'as yet unclassified' }
 CombinationsFinder >> findCombinaitionsValues: valuesArray total: total current: current result: result [
 
-	| sum |
-	sum := 0.
-	current do: [ :aValue | sum := sum + aValue ].
+	| sum first remaining |
+	sum := current
+		       inject: 0
+		       into: [ :totalSoFar :aValue | totalSoFar + aValue ].
 
 	sum = total ifTrue: [
-		result add: current.
-		valuesArray isEmpty
-			ifTrue: [ ^ self ]
-			ifFalse: [
-				^ self
-					  findCombinaitionsValues: valuesArray
-					  total: total
-					  current: current allButLast
-					  result: result ] ].
-	sum > total
-		ifTrue: [
-			valuesArray isEmpty
-				ifTrue: [ ^ self ]
-				ifFalse: [
-					current isEmpty ifTrue: [ ^ self ].
-					^ self
-						  findCombinaitionsValues: (valuesArray copy
-								   add: current last;
-								   yourself)
-						  total: total
-						  current: current allButLast
-						  result: result ] ]
-		ifFalse: [
-			^ self
-				  findCombinaitionsValues: valuesArray allButFirst
-				  total: total
-				  current: (current copy
-						   add: valuesArray first;
-						   yourself)
-				  result: result ]
+		result add: current copy.
+		^ self ].
+	(sum > total or: [ valuesArray isEmpty ]) ifTrue: [ ^ self ].
+
+	first := valuesArray first.
+	remaining := valuesArray allButFirst.
+	self
+		findCombinaitionsValues: remaining
+		total: total
+		current: (current copy
+				 add: first;
+				 yourself)
+		result: result.
+	self
+		findCombinaitionsValues: remaining
+		total: total
+		current: current
+		result: result
 ]
 
 { #category : 'initialize-release' }
