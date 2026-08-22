@@ -2,7 +2,7 @@ SmalltalkCISpec {
   #loading : [
     SCIMetacelloLoadSpec {
       #baseline : 'CombinationsFinder',
-      #directory : 'src',  
+      #directory : 'CombinationsFinder',  
       #platforms : [ #pharo ]
     }
   ],
