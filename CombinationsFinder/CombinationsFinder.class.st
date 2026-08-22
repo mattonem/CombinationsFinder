@@ -32,26 +32,62 @@ CombinationsFinder class >> exporterClass [
 CombinationsFinder class >> generateHtmlUsing: html [
 
 	<pharoJsSkip>
-
-	
-	html div class: 'container mt-5'; with: [
-		html div class: 'row justify-content-center'; with: [
-			html  heading
-                    level: 1; 
-					class: 'text-center mb-4'; 
-					with: [ html text: 'Combinations Finder' ].
-			html div class: 'col-md-6'; with: [
-				html div class: 'card'; with: [
-				
-					
-				].
-				html div class: 'card'; with: [
-					html div class: 'card-header'; with: [ html text: 'Possible combinations' ].
-				
-				].
-			].
-		].
-	].
+	html div
+		class: 'container mt-5';
+		with: [
+			html div
+				class: 'row justify-content-center';
+				with: [
+					html heading
+						level: 1;
+						class: 'text-center mb-4';
+						with: [ html text: 'Combinations Finder' ].
+					html div
+						class: 'col-md-6';
+						with: [
+							html div
+								class: 'card';
+								with: [
+									html div
+										class: 'card-header';
+										with: [ html text: 'Input' ].
+									html div
+										class: 'card-body';
+										with: [
+											html form with: [
+													html div
+														class: 'mb-3';
+														with: [
+															html label
+																class: 'form-label';
+																for: 'values';
+																with: [ html text: 'Values (seperated by ;)' ].
+															html textInput
+																class: 'form-control';
+																id: 'values';
+																placeholder: '10;20' ].
+													html div
+														class: 'mb-3';
+														with: [
+															html label
+																class: 'form-label';
+																for: 'total';
+																with: [ html text: 'Total' ].
+															html textInput
+																class: 'form-control';
+																id: 'total' ].
+													html submitButton
+														class: 'btn btn-primary';
+														value: 'Find combinaisons' ] ] ].
+							html div
+								class: 'card';
+								with: [
+									html div
+										class: 'card-header';
+										with: [ html text: 'Possible combinations' ].
+									html div
+										class: 'card-body';
+										with: [ html preformatted id: 'result' ] ] ] ] ]
 ]
 
 { #category : 'accessing' }
@@ -71,4 +107,79 @@ CombinationsFinder class >> updateHtmlRoot: root [
 	root stylesheet url:
 		'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'.
 		
+]
+
+{ #category : 'as yet unclassified' }
+CombinationsFinder >> findCombinaitionsValues: valuesArray total: total [
+
+	| result current |
+	result := Array new.
+	current := Array new. 
+	self findCombinaitionsValues: valuesArray total: total current: current result: result. 
+	^ result. 
+]
+
+{ #category : 'as yet unclassified' }
+CombinationsFinder >> findCombinaitionsValues: valuesArray total: total current: current result: result [
+
+	| sum |
+	sum := 0.
+	current do: [ :aValue | sum := sum + aValue ].
+
+	sum = total ifTrue: [
+		result add: current.
+		valuesArray isEmpty
+			ifTrue: [ ^ self ]
+			ifFalse: [
+				^ self
+					  findCombinaitionsValues: valuesArray
+					  total: total
+					  current: current allButLast
+					  result: result ] ].
+	sum > total
+		ifTrue: [
+			valuesArray isEmpty
+				ifTrue: [ ^ self ]
+				ifFalse: [
+					current isEmpty ifTrue: [ ^ self ].
+					^ self
+						  findCombinaitionsValues: (valuesArray copy
+								   add: current last;
+								   yourself)
+						  total: total
+						  current: current allButLast
+						  result: result ] ]
+		ifFalse: [
+			^ self
+				  findCombinaitionsValues: valuesArray allButFirst
+				  total: total
+				  current: (current copy
+						   add: valuesArray first;
+						   yourself)
+				  result: result ]
+]
+
+{ #category : 'initialize-release' }
+CombinationsFinder >> start [
+
+	super start.
+
+	(document querySelector: 'form')
+		addEventListener: 'submit'
+		do: [ :event |
+			| valuesString valuesStringArray valuesArray total result resultString |
+			event preventDefault.
+			valuesString := (document getElementById: #values) value.
+			valuesStringArray := $; split: valuesString.
+			valuesArray := valuesStringArray collect: #asNumber.
+
+			total := (document getElementById: #total) value asNumber.
+
+			result := self findCombinaitionsValues: valuesArray total: total.
+			resultString := ''.
+			result do: [ :aComb |
+				aComb do: [ :aValue |
+					resultString := resultString , aValue asString , ' - ' ].
+				resultString := resultString , String cr ].
+			(document getElementById: #result) innerText: resultString ]
 ]
