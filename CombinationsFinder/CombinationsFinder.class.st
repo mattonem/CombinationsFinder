@@ -9,6 +9,26 @@ Class {
 }
 
 { #category : 'accessing' }
+CombinationsFinder class >> bridgeClass [
+	<pharoJsSkip>
+	^ PjBridge
+]
+
+{ #category : 'accessing' }
+CombinationsFinder class >> bridgeClientClass [
+	<pharoJsSkip>
+	
+	^ PjZnHostedBrowserBridgeClient
+]
+
+{ #category : 'accessing' }
+CombinationsFinder class >> exporterClass [
+
+	<pharoJsSkip>
+	^ PjFileExporterWithIndexHtml
+]
+
+{ #category : 'accessing' }
 CombinationsFinder class >> generateHtmlUsing: html [
 
 	<pharoJsSkip>
