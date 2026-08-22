@@ -61,11 +61,11 @@ CombinationsFinder class >> generateHtmlUsing: html [
 															html label
 																class: 'form-label';
 																for: 'values';
-																with: [ html text: 'Values (seperated by ;)' ].
+																with: [ html text: 'Values (seperated by ; and decimal should . character)' ].
 															html textInput
 																class: 'form-control';
 																id: 'values';
-																placeholder: '10;20' ].
+																placeholder: '10.45;20.11' ].
 													html div
 														class: 'mb-3';
 														with: [
