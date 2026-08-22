@@ -106,6 +106,10 @@ CombinationsFinder class >> updateHtmlRoot: root [
 		'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'.
 	root stylesheet url:
 		'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'.
+	root link
+		relationship: 'icon';
+		type: WCMimeType imageXIcon;
+		url: 'https://mattonem.github.io/assets/combinations_finder.svg'.
 		
 ]
 
