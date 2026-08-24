@@ -174,9 +174,10 @@ CombinationsFinder >> start [
 
 			result := self findCombinaitionsValues: valuesArray total: total.
 			resultString := ''.
-			result do: [ :aComb |
+			result allButLast do: [ :aComb |
 				aComb do: [ :aValue |
 					resultString := resultString , aValue asString , ' - ' ].
+				resultString := resultString , result last asString.
 				resultString := resultString , String cr ].
 			(document getElementById: #result) innerText: resultString ]
 ]
