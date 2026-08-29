@@ -60,25 +60,39 @@ CombinationsFinder class >> generateHtmlUsing: html [
 														with: [
 															html label
 																class: 'form-label';
-																for: 'values';
-																with: [ html text: 'Values (seperated by ; and decimal should . character)' ].
+																for: 'newValues';
+																with: [
+																	html text:
+																			'Values (seperated by ; and decimal should . character)' ].
 															html textInput
 																class: 'form-control';
-																id: 'values';
-																placeholder: '10.45;20.11' ].
-													html div
-														class: 'mb-3';
-														with: [
-															html label
-																class: 'form-label';
-																for: 'total';
-																with: [ html text: 'Total' ].
-															html textInput
-																class: 'form-control';
-																id: 'total' ].
-													html submitButton
-														class: 'btn btn-primary';
-														value: 'Find combinaisons' ] ] ].
+																id: 'newValues';
+																placeholder: '10.45;20.11' ] ].
+											html div
+												class: 'mb-3';
+												with: [
+													html div id: #visibleValues.
+													html select
+														class: 'form-control';
+														disabled;
+														hidden: true;
+														multiple;
+														id: 'values';
+														with: [  ] ].
+											html form with: [
+												html div
+													class: 'mb-3';
+													with: [
+														html label
+															class: 'form-label';
+															for: 'total';
+															with: [ html text: 'Total' ].
+														html textInput
+															class: 'form-control';
+															id: 'total' ].
+												html submitButton
+													class: 'btn btn-primary';
+													value: 'Find combinaisons' ] ] ].
 							html div
 								class: 'card';
 								with: [
@@ -157,19 +171,80 @@ CombinationsFinder >> findCombinaitionsValues: valuesArray total: total current:
 ]
 
 { #category : 'initialize-release' }
+CombinationsFinder >> setSelectedValues: valuesArray [
+
+	(document getElementById: #values) innerHTML: ''.
+	valuesArray do: [ :aValue |
+		| frag |
+		frag := document createElement: 'template'.
+		frag innerHTML: (WCHtmlCanvas builder
+				 fullDocument: false;
+				 render: [ :html |
+					 html option selected
+						 value: aValue;
+						 with: aValue ]).
+		(document getElementById: #values) appendChild: frag content ]
+]
+
+{ #category : 'initialize-release' }
 CombinationsFinder >> start [
 
+	| observer |
 	super start.
+	observer := MutationObserver new: [ :aMutation |
+		            | frag |
+		            (document getElementById: #visibleValues) innerHTML: ''.
+		            frag := document createElement: 'template'.
+		            frag innerHTML: (WCHtmlCanvas builder
+				             fullDocument: false;
+				             render: [ :html |
+					             | valuesArray |
+					             valuesArray := ((document getElementById: #values)
+						                             options collect: #value) collect:
+							                            #asNumber.
+					             valuesArray do: [ :aVal |
+							             html span
+								             class: 'badge rounded-pill text-bg-secondary';
+								             with: [
+									             html text: aVal.
+									             html button
+										             id: 'removeValue';
+										             class: 'btn-close' ] ] ]).
+		            (document getElementById: #visibleValues) appendChild:
+			            frag content.
 
-	(document querySelector: 'form')
-		addEventListener: 'submit'
-		do: [ :event |
+		            (document querySelectorAll: '#removeValue') do: [
+			            :aButton |
+			            aButton addEventListener: #click block: [
+				            | valuesArray |
+				            valuesArray := (((document getElementById: #values)
+					                             options collect: #value) collect:
+						                            #asNumber)
+					                           remove:
+						                           aButton parentNode textContent
+							                           asNumber;
+					                           yourself.
+				            self setSelectedValues: valuesArray ] ] ].
+	observer observe: (document getElementById: #values) config: {
+			(#childList -> true).
+			(#subtree -> true) } asJsObject.
+	(document querySelectorAll: 'form') do: [ :aForm |
+		aForm addEventListener: 'submit' do: [ :event |
 			| valuesString valuesStringArray valuesArray total result resultString |
 			event preventDefault.
-			valuesString := (document getElementById: #values) value.
+			valuesString := (document getElementById: #newValues) value.
+			(document getElementById: #newValues) value: ''.
 			valuesStringArray := $; split: valuesString.
-			valuesArray := valuesStringArray collect: #asNumber.
+			valuesStringArray remove: '' ifAbsent: [  ].
 
+			valuesArray := (((document getElementById: #values) options
+				                 collect: #value) collect: #asNumber)
+				               addAll: (valuesStringArray collect: #asNumber);
+				               yourself.
+
+			self setSelectedValues: valuesArray.
+			valuesArray := ((document getElementById: #values) options
+				                collect: #value) collect: #asNumber.
 			total := (document getElementById: #total) value asNumber.
 
 			result := self findCombinaitionsValues: valuesArray total: total.
@@ -181,5 +256,5 @@ CombinationsFinder >> start [
 						separatedBy: [ resultString := resultString , ' - ' ] ]
 				separatedBy: [ :aComb | resultString := resultString , String cr ].
 
-			(document getElementById: #result) innerText: resultString ]
+			(document getElementById: #result) innerText: resultString ] ]
 ]
