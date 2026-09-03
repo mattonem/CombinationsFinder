@@ -54,20 +54,29 @@ CombinationsFinder class >> generateHtmlUsing: html [
 									html div
 										class: 'card-body';
 										with: [
-											html form with: [
+											html form
+												class: 'row row-cols-lg-auto g-3 align-items-center ';
+												with: [
+													html div
+														class: 'mb-6 ';
+														with: [
+															html div
+																class: 'form-floating';
+																with: [
+																	html textInput
+																		class: 'form-control';
+																		id: 'newValues';
+																		placeholder: ''.
+																	html label
+																		for: 'newValues';
+																		with:
+																			'Values (seperated by ;)' ] ].
 													html div
 														class: 'mb-3';
 														with: [
-															html label
-																class: 'form-label';
-																for: 'newValues';
-																with: [
-																	html text:
-																			'Values (seperated by ; and decimal should . character)' ].
-															html textInput
-																class: 'form-control';
-																id: 'newValues';
-																placeholder: '10.45;20.11' ] ].
+															html submitButton
+																class: 'btn btn-primary';
+																value: 'Add values' ] ].
 											html div
 												class: 'mb-3';
 												with: [
@@ -117,7 +126,9 @@ CombinationsFinder class >> updateHtmlRoot: root [
 	<pharoJsSkip>
 	root language: 'en'.
 	root stylesheet url:
-		'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css'.
+		'https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css'.
+		root javascript url:
+		'https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js'.
 	root stylesheet url:
 		'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'.
 	root link
@@ -234,6 +245,7 @@ CombinationsFinder >> start [
 			event preventDefault.
 			valuesString := (document getElementById: #newValues) value.
 			(document getElementById: #newValues) value: ''.
+			valuesString := valuesString replaceAll: $, with: $..
 			valuesStringArray := $; split: valuesString.
 			valuesStringArray remove: '' ifAbsent: [  ].
 
