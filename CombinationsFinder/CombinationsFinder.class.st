@@ -247,17 +247,20 @@ CombinationsFinder >> start [
 			(document getElementById: #newValues) value: ''.
 			valuesString := valuesString replaceAll: $, with: $..
 			valuesStringArray := $; split: valuesString.
-			valuesStringArray remove: '' ifAbsent: [  ].
+			valuesStringArray := valuesStringArray copyWithout: ''.
 
 			valuesArray := (((document getElementById: #values) options
 				                 collect: #value) collect: #asNumber)
 				               addAll: (valuesStringArray collect: #asNumber);
 				               yourself.
+			valuesArray := valuesArray select: [ :e | (Number isNaN: e) not ].
 
 			self setSelectedValues: valuesArray.
 			valuesArray := ((document getElementById: #values) options
 				                collect: #value) collect: #asNumber.
-			total := (document getElementById: #total) value asNumber.
+			total := (document getElementById: #total) value.
+			total := total replaceAll: $, with: $..
+			total := total asNumber.
 
 			result := self findCombinaitionsValues: valuesArray total: total.
 			resultString := ''.
